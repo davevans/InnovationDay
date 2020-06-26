@@ -32,10 +32,10 @@ project {
 
 object HelloWorld: BuildType({
     name = "Hello World"
-    steps  {
-        script {
-            scriptContent = "echo 'hello world'"
-        }
+    templates(MyTemplate)
+
+    params {
+        param("repository", "Hello World")
     }
 })
 
