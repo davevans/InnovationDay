@@ -1,5 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
+import java.io.File
+import java.nio.file.Files.walk
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -28,6 +30,11 @@ version = "2020.1"
 project {
     template(MyTemplate)
     buildType(HelloWorld)
+
+    /* Read yml files to create subprojects */
+    File("/Projects")
+            .walkTopDown()
+            .forEach {it -> println(it.absolutePath) }
 }
 
 object HelloWorld: BuildType({
