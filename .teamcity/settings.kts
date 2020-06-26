@@ -1,35 +1,9 @@
-import com.charleskorn.kaml.Yaml
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import java.io.File
 import java.util.*
-import java.io.Serializable
-//import kotlinx.serialization.*
-//import kotlinx-ser
 
-/*
-The settings script is an entry point for defining a TeamCity
-project hierarchy. The script should contain a single call to the
-project() function with a Project instance or an init function as
-an argument.
-
-VcsRoots, BuildTypes, Templates, and subprojects can be
-registered inside the project using the vcsRoot(), buildType(),
-template(), and subProject() methods respectively.
-
-To debug settings scripts in command-line, run the
-
-    mvnDebug org.jetbrains.teamcity:teamcity-configs-maven-plugin:generate
-
-command and attach your debugger to the port 8000.
-
-To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
--> Tool Windows -> Maven Projects), find the generate task node
-(Plugins -> teamcity-configs -> teamcity-configs:generate), the
-'Debug' option is available in the context menu for the task.
-*/
-
-data class TeamCityProject(val name: String )
+data class TeamCityProject(val id: String, val name: String, val parentProjectId: String?)
 
 version = "2020.1"
 
@@ -38,17 +12,20 @@ project {
     buildType(HelloWorld)
 
 
-
     /* Read yml files to create subprojects */
     var projectsRoot = File(DslContext.baseDir, "/Projects")
     var subProjects = discoverSubProjects(projectsRoot)
-    for (p: Project in subProjects) {
-        subProject(p)
+    for (p: TeamCityProject in subProjects) {
+        subProject({
+            id(p.id)
+            name = p.name
+            parentId = if(p.parentProjectId != null) AbsoluteId(p.parentProjectId) else null
+        })
     }
 }
 
-fun discoverSubProjects(dir: File) : List<Project> {
-    var result = LinkedList<Project>()
+fun discoverSubProjects(dir: File) : List<TeamCityProject> {
+    var result = LinkedList<TeamCityProject>()
     var projects = LinkedList<File>()
     var subdirectories = dir.listFiles()
     for (item: File in subdirectories) {
@@ -58,7 +35,7 @@ fun discoverSubProjects(dir: File) : List<Project> {
             var projectFile = getProjectFile(item);
             if(projectFile != null)
             {
-                var subProject = addProject(projectFile, null)
+                var subProject = getTeamCityProject(projectFile, null)
                 result.add(subProject)
             }
         }
@@ -66,13 +43,21 @@ fun discoverSubProjects(dir: File) : List<Project> {
 
     while (!projects.isEmpty())
     {
-        val current: File = projects.poll()
-        subdirectories = current.listFiles()
+        val parentDirectory: File = projects.poll()
+        var parentProjFile = getProjectFile(parentDirectory);
+
+        var parentTeamCityProj = getTeamCityProject(parentProjFile!!, null)
+        subdirectories = parentDirectory.listFiles()
         for (item: File in subdirectories) {
             if(item.isDirectory())
             {
                 projects.add(item);
                 var projectFile = getProjectFile(item);
+                if(projectFile != null)
+                {
+                    var subProject = getTeamCityProject(projectFile, parentTeamCityProj.name)
+                    result.add(subProject)
+                }
             }
         }
     }
@@ -90,27 +75,24 @@ fun getProjectFile(dir: File) : File? {
     return null
 }
 
-fun addProject(file: File, parentProjectName: String?) : Project {
+fun getTeamCityProject(file: File, parentProjectName: String?) : TeamCityProject {
     var fileContent = file.readText()
+    /*
     var sub = Project({
         id(file.parentFile.name)
         name = file.parentFile.name
     })
-    println("Creating subProject with name ${sub.name}.")
-    return sub
+    */
+
+    var name = file.parentFile.name
+    var teamCityProj = TeamCityProject(name, name, parentProjectName)
+
+    //println("Creating subProject with name ${sub.name}.")
+    return teamCityProj
 
     //var serializer = TeamCityProject.serializer()
     //var project: TeamCityProject = Yaml.default.parse(TeamCityProject.serializer(), fileContent)
 }
-
-fun CreateSubProject(f: File) : Unit {
-
-    //var x = f.
-}
-
-
-//@Serializable
-data class Data(val a: Int, val b: Int)
 
 
 object HelloWorld: BuildType({
