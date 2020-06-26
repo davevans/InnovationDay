@@ -18,14 +18,13 @@ project {
     for (p: TeamCityProject in subProjects) {
 
         println("Adding project ${p.name}. ParentName: ${p.parentProjectName}")
-        //var parent = if(p.parentProjectName != null) RelativeId(p.parentProjectName) else null
+        var parentId = if(p.parentProjectName != null) AbsoluteId(p.parentProjectName.toId()) else null
 
 
         subProject({
             id(p.id)
             name = p.name
-            parentId = AbsoluteId(p.parentProjectName!!.toId())
-            //parentId = p.parentProjectName.toId()
+            parentId = parentId
         })
     }
 }
