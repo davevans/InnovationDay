@@ -26,6 +26,7 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 version = "2020.1"
 
 project {
+    template(MyTemplate)
     buildType(HelloWorld)
 }
 
@@ -35,5 +36,19 @@ object HelloWorld: BuildType({
         script {
             scriptContent = "echo 'hello world'"
         }
+    }
+})
+
+object MyTemplate: Template({
+    name = "MyTemplate"
+
+    steps  {
+        script {
+            scriptContent = "echo 'hello world' lets compile %repository%"
+        }
+    }
+
+    params {
+        param("repository", "")
     }
 })
