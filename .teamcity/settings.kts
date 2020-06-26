@@ -32,7 +32,7 @@ project {
     buildType(HelloWorld)
 
     /* Read yml files to create subprojects */
-    File("/Projects")
+    File(DslContext.baseDir,"/Projects")
             .walkTopDown()
             .forEach {it -> println(it.absolutePath) }
 }
