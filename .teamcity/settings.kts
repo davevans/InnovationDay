@@ -7,47 +7,35 @@ import java.util.*
 
 // Model
 class TeamCityProject(val name: String) {
-    var parent: TeamCityProject? = null
+    //var parent: TeamCityProject? = null
 }
 
 version = "2020.1"
 
 project {
 
-
     /* Read yml files to create subprojects */
     var projectsRoot = File(DslContext.baseDir, "/Projects")
-    var subdirectories = projectsRoot.listFiles()
-    for (item: File in subdirectories)
-    {
-        if(item.isDirectory())
-        {
-            var proj = getProject(item, null);
-            println("adding ${proj!!.name}")
-
-            subProject({
-                id(proj!!.name)
-                name = proj.name
-            })
-        }
-    }
+    addProject(projectsRoot, this)
 }
 
-fun getProject(currentDirectory: File, parent: TeamCityProject?) : TeamCityProject? {
+fun addProject(currentDirectory: File, parent: Project) : Unit {
 
-    var proj = TeamCityProject(currentDirectory.name)
-    proj.parent = parent
-
-    println("discovered ${proj.name}")
 
     var subdirectories = currentDirectory.listFiles()
     for (item: File in subdirectories) {
         if(item.isDirectory())
         {
-            getProject(item, proj);
+            var projectName = item.name;
+            var sub = parent.subProject({
+                id(projectName)
+                name = projectName
+            })
+
+            println("added $projectName")
+
+            addProject(item, sub)
         }
     }
-
-    return proj;
 }
 
