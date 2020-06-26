@@ -8,8 +8,9 @@ data class TeamCityProject(val id: String, val name: String, val parentProjectNa
 version = "2020.1"
 
 project {
-    template(MyTemplate)
-    buildType(HelloWorld)
+
+    //template(MyTemplate)
+    //buildType(HelloWorld)
 
 
     /* Read yml files to create subprojects */
@@ -18,13 +19,13 @@ project {
     for (p: TeamCityProject in subProjects) {
 
         println("Adding project ${p.name}. ParentName: ${p.parentProjectName}")
-        var parentId = if(p.parentProjectName != null) AbsoluteId(p.parentProjectName.toId()) else null
-
+        //var id = id(p.id);
+        //var parentId = if(p.parentProjectName != null) AbsoluteId(p.parentProjectName.toId()) else null
 
         subProject({
             id(p.id)
             name = p.name
-            parentId = parentId
+            uuid = p.name
         })
     }
 }
