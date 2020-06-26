@@ -3,7 +3,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import java.io.File
 import java.util.*
 
-data class TeamCityProject(val id: String, val name: String, val parentProjectId: String?)
+data class TeamCityProject(val id: String, val name: String, val parentProjectName: String?)
 
 version = "2020.1"
 
@@ -16,10 +16,16 @@ project {
     var projectsRoot = File(DslContext.baseDir, "/Projects")
     var subProjects = discoverSubProjects(projectsRoot)
     for (p: TeamCityProject in subProjects) {
+
+        println("Adding project ${p.name}. ParentName: ${p.parentProjectName}")
+        //var parent = if(p.parentProjectName != null) RelativeId(p.parentProjectName) else null
+
+
         subProject({
             id(p.id)
             name = p.name
-            parentId = if(p.parentProjectId != null) AbsoluteId(p.parentProjectId) else null
+            parentId = AbsoluteId(p.parentProjectName!!.toId())
+            //parentId = p.parentProjectName.toId()
         })
     }
 }
