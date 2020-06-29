@@ -6,7 +6,6 @@ version = "2020.1"
 project {
 
     /* Read yml files to create subprojects */
-    //var projectsRoot = File(DslContext.baseDir, "/Projects")
     val projectsRoot = File(DslContext.baseDir, "/Projects")
     addProject(projectsRoot, this)
 
@@ -26,7 +25,7 @@ fun addProject(currentDirectory: File, parent: Project) : Unit {
             val projectDto : ProjectDto = YAMLUtil.parseDto("_Project.yaml", ProjectDto::class)
             //TODO:
 
-            val projectName = it.name
+            val projectName = projectDto.name
             val sub = parent.subProject {
                 id(projectName)
                 name = projectName
