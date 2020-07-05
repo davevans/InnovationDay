@@ -6,8 +6,10 @@ version = "2020.1"
 project {
 
     /* Read yml files to create subprojects */
-    var projectsRoot = File(DslContext.baseDir, "/Projects")
+    val projectsRoot = File(DslContext.baseDir, "/Projects")
     addProject(projectsRoot, this)
+
+
 }
 
 
@@ -15,17 +17,21 @@ project {
 * Recursively adds projects to match the file system
 */
 fun addProject(currentDirectory: File, parent: Project) : Unit {
-    var subdirectories = currentDirectory.listFiles()
-    for (item: File in subdirectories) {
-        if(item.isDirectory())
+    val subdirectories = currentDirectory.listFiles()
+
+    subdirectories?.forEach{
+        if(it.isDirectory)
         {
-            var projectName = item.name;
-            var sub = parent.subProject({
+            val projectDto : ProjectDto = YAMLUtil.parseDto("_Project.yaml", ProjectDto::class)
+            //TODO:
+
+            val projectName = projectDto.name
+            val sub = parent.subProject {
                 id(projectName)
                 name = projectName
-            })
-
-            addProject(item, sub)
+            }
+            addProject(it, sub)
         }
     }
+
 }
